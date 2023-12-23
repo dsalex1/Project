@@ -91,7 +91,7 @@ function joinWavs(wavGroup) {
         //if it isnt the last file remove zeros from end of the wav
         if (i !== arr.length - 1) {
             let lastNonZeroIndex = wav.channelData[0].findLastIndex(x => x > 0.01);
-            if (i == 0) lastNonZeroIndex -= 3000 // if were at the first file shove it back another few samples to adjust for the "mi light" => "milight"
+            if (i == 0) lastNonZeroIndex -= 2500 // if were at the first file shove it back another few samples to adjust for the "mi light" => "milight"
             wav.channelData[0] = wav.channelData[0].slice(0, lastNonZeroIndex);
         }
         return {
