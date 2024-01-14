@@ -23,6 +23,18 @@ function chunk(arr, size) {
     }
     return groups;
 }
+function shuffle(array) {
+    var currentIndex = array.length, temporaryValue, randomIndex;
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) { // Pick a remaining element...
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1; // And swap it with the current element.
+        temporaryValue = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = temporaryValue;
+    } return array;
+}
+
 function zip(...arrays) {
     const length = Math.min(...arrays.map(a => a.length));
     return Array.from({ length }, (_, i) => arrays.map(a => a[i]));
@@ -34,39 +46,77 @@ function concat32FloatArrs(arr1, arr2) {
     result.set(arr2, arr1.length);
     return result;
 }
-
-const groups = {
-    random: chunk(folders.random, 3),
-    on: zip(
-        folders.my.slice(0, 100),
-        folders.light.slice(0, 100),
-        folders.on.slice(0, 100)
-    ),
-    off: zip(
-        folders.my.slice(0, 100),
-        folders.light.slice(0, 100),
-        folders.off.slice(0, 100)
-    ),
-    mood: zip(
-        folders.my.slice(0, 100),
-        folders.light.slice(0, 100),
-        folders.mood.slice(0, 100)
-    )
+function shuffleAugment(arr, n) {
+    //n times a shuffled array
+    let result = [];
+    for (let i = 0; i < n; i++) {
+        result = result.concat(shuffle(arr));
+    }
+    return result;
 }
+const groups = {
+    random:
+        zip(
+            folders.my.slice(0, 300),
+            folders.light.slice(0, 300),
+            folders.random.slice(0, 300)
+        ).concat(zip(
+            folders.random.slice(0, 300),
+            shuffle([...folders.on, ...folders.off, ...folders.mood, ...folders.brighter, ...folders.dimmer]).slice(0, 300)
+        ))
+            .concat(chunk(shuffle(folders.random), 3).slice(0, 100))
+            .concat(chunk(shuffle(folders.random), 3).slice(0, 100))
+            .concat(chunk(shuffle(folders.random), 3).slice(0, 100)),
+    on: zip(...[
+        folders.my.slice(0, 300),
+        folders.light.slice(0, 300),
+        folders.on.slice(0, 300)
+    ].map(s => shuffleAugment(s, 3))),
+    off: zip(...[
+        folders.my.slice(0, 300),
+        folders.light.slice(0, 300),
+        folders.off.slice(0, 300)
+    ].map(s => shuffleAugment(s, 3))),
+    mood: zip(...[
+        folders.my.slice(0, 300),
+        folders.light.slice(0, 300),
+        folders.mood.slice(0, 300)
+    ].map(s => shuffleAugment(s, 3))),
+    brighter: zip(...[
+        folders.my.slice(0, 300),
+        folders.light.slice(0, 300),
+        folders.brighter.slice(0, 300)
+    ].map(s => shuffleAugment(s, 3))),
+    dimmer: zip(...[
+        folders.my.slice(0, 300),
+        folders.light.slice(0, 300),
+        folders.dimmer.slice(0, 300)
+    ].map(s => shuffleAugment(s, 3))),
+}
+
 //if the folder doesnt exist create it
 if (!fs.existsSync(`${__dirname}/joinedData`)) {
     fs.mkdirSync(`${__dirname}/joinedData`);
 }
-let i = 0
+let i = 4 * 900
 for (const [groupName, wavGroup] of Object.entries(groups)) {
+    console.log(groupName)
+    let n = 0;
     for (const wavPaths of wavGroup) {
-        console.log(wavPaths)
-        const joined = joinWavs(wavPaths);
-        //if the folder doesnt exist create it
-        if (!fs.existsSync(`${__dirname}/joinedData/${groupName}`)) {
-            fs.mkdirSync(`${__dirname}/joinedData/${groupName}`);
+        //status each 100
+        if (n++ % 100 == 0) console.log(n - 1)
+
+        try {
+            const joined = joinWavs(wavPaths);
+            //if the folder doesnt exist create it
+            if (!fs.existsSync(`${__dirname}/joinedData/${groupName}`)) {
+                fs.mkdirSync(`${__dirname}/joinedData/${groupName}`);
+            }
+            fs.writeFileSync(`${__dirname}/joinedData/${groupName}/${i++}.wav`, joined);
+        } catch (e) {
+            console.log(wavPaths)
+            throw e;
         }
-        fs.writeFileSync(`${__dirname}/joinedData/${groupName}/${i++}.wav`, joined);
     }
 }
 
