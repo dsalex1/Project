@@ -1,5 +1,7 @@
-silence in random mit rein so ordentlich 
+silence in random mit rein so ordentlich
+
 daten eng truncaten
+
 mit idk 500ms left right padden
 
 dann window size max sample size +500ms
