@@ -1,3 +1,4 @@
+silence in random mit rein so ordentlich 
 daten eng truncaten
 mit idk 500ms left right padden
 
