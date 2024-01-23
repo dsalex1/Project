@@ -28,6 +28,13 @@ static uint8_t id1 = 0x11;
 static uint8_t message_t[] = {0xB0, id0, id1, 0x00, 0x00, 0x00, 0x00};
 
 uint8_t seq_num = 0x00;
+
+#define STATE_LAMP_OFF 0
+#define STATE_LAMP_ON 1
+#define STATE_LAMP_BRIGHTER 2
+#define STATE_LAMP_MOOD 3
+
+uint8_t glob_state = 0x00;
 uint8_t glob_resend = 0x00;
 
 
@@ -72,22 +79,45 @@ void setup()
 }
 
 
-void send_raw(uint8_t data[7], uint8_t resend = 3) {
+void send_raw(uint8_t data[7], uint8_t resend = 4) {
     data[6] = seq_num;
     seq_num++;
     mlr.write(data, 7);
     glob_resend = resend;
-    /*
-    delay(1);
-    for (int j = 0; j < resend; ++j) {
-        mlr.resend();
-        delay(5);
+}
+
+void lampMessage() {
+  if(glob_resend != 0) {
+    glob_resend--;
+    if((glob_state == STATE_LAMP_BRIGHTER || glob_state == STATE_LAMP_MOOD) && glob_resend == 0) {
+        uint8_t message[7];
+        memcpy(message, message_t, 7);
+        if(glob_state == STATE_LAMP_MOOD) {
+          message[4] = 0x41;
+          message[5] = 0x0E;
+        }else if(glob_state == STATE_LAMP_BRIGHTER) {
+          message[4] = 0x09;
+          message[5] = 0x0E;
+        }
+        send_raw(message);
+        glob_state = STATE_LAMP_ON;
+    }else {
+      mlr.resend();
     }
-    delay(10);
-    */
+  }
 }
 
 void lampOn() {
+    glob_state = STATE_LAMP_BRIGHTER;
+    uint8_t message[7];
+    memcpy(message, message_t, 7);
+    message[4] = 0x01;
+    message[5] = 0x03;
+    send_raw(message);
+}
+
+void lampMood() {
+    glob_state = STATE_LAMP_MOOD;
     uint8_t message[7];
     memcpy(message, message_t, 7);
     message[4] = 0x01;
@@ -96,6 +126,7 @@ void lampOn() {
 }
 
 void lampOff() {
+    glob_state = STATE_LAMP_OFF;
     uint8_t message[7];
     memcpy(message, message_t, 7);
     message[4] = 0x01;
@@ -123,11 +154,6 @@ void loop()
         return;
     }
 
-    if(glob_resend != 0) {
-      mlr.resend();
-      glob_resend--;
-    }
-
     if (++print_results >= (EI_CLASSIFIER_SLICES_PER_MODEL_WINDOW)) {
       int highest = 0;
       float highestValue = 0;
@@ -143,11 +169,14 @@ void loop()
                     result.classification[highest].value,
                     result.classification[0].value, result.classification[1].value, result.classification[2].value, result.classification[3].value);
 
-
-        if(highest == 1) { // off
-          lampOff();
-        }else if(highest == 2) { // on
-          lampOn();
+        if(highestValue > 0.6) {
+          if(highest == 0) { // brighter
+            lampOn();
+          }else if(highest == 1) { // mood
+            lampMood();
+          }else if(highest == 2) { // off
+            lampOff();
+          }
         }
       }
       print_results = 0;
@@ -274,6 +303,7 @@ static bool microphone_inference_record(void)
 
     while (inference.buf_ready == 0) {
         delay(1);
+        lampMessage();
     }
 
     inference.buf_ready = 0;

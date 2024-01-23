@@ -25,16 +25,16 @@
 #include <stdint.h>
 #include "model_metadata.h"
 
-#include "tflite-model/tflite_learn_18_compiled.h"
+#include "tflite-model/tflite_learn_27_compiled.h"
 #include "edge-impulse-sdk/classifier/ei_model_types.h"
 #include "edge-impulse-sdk/classifier/inferencing_engines/engines.h"
 
-const char* ei_classifier_inferencing_categories[] = { "mood", "off", "on", "random" };
+const char* ei_classifier_inferencing_categories[] = { "brighter", "mood", "off", "random" };
 
-uint8_t ei_dsp_config_20_axes[] = { 0 };
-const uint32_t ei_dsp_config_20_axes_size = 1;
-ei_dsp_config_mfe_t ei_dsp_config_20 = {
-    20, // uint32_t blockId
+uint8_t ei_dsp_config_31_axes[] = { 0 };
+const uint32_t ei_dsp_config_31_axes_size = 1;
+ei_dsp_config_mfe_t ei_dsp_config_31 = {
+    31, // uint32_t blockId
     4, // int implementationVersion
     1, // int length of axes
     0.02f, // float frame_length
@@ -49,27 +49,27 @@ ei_dsp_config_mfe_t ei_dsp_config_20 = {
 
 const size_t ei_dsp_blocks_size = 1;
 ei_model_dsp_t ei_dsp_blocks[ei_dsp_blocks_size] = {
-    { // DSP block 20
-        20,
+    { // DSP block 31
+        31,
         3960,
         &extract_mfe_features,
-        (void*)&ei_dsp_config_20,
-        ei_dsp_config_20_axes,
-        ei_dsp_config_20_axes_size
+        (void*)&ei_dsp_config_31,
+        ei_dsp_config_31_axes,
+        ei_dsp_config_31_axes_size
     }
 };
-const ei_config_tflite_eon_graph_t ei_config_tflite_graph_18 = {
+const ei_config_tflite_eon_graph_t ei_config_tflite_graph_27 = {
     .implementation_version = 1,
-    .model_init = &tflite_learn_18_init,
-    .model_invoke = &tflite_learn_18_invoke,
-    .model_reset = &tflite_learn_18_reset,
-    .model_input = &tflite_learn_18_input,
-    .model_output = &tflite_learn_18_output,
+    .model_init = &tflite_learn_27_init,
+    .model_invoke = &tflite_learn_27_invoke,
+    .model_reset = &tflite_learn_27_reset,
+    .model_input = &tflite_learn_27_input,
+    .model_output = &tflite_learn_27_output,
 };
 
-const ei_learning_block_config_tflite_graph_t ei_learning_block_config_18 = {
+const ei_learning_block_config_tflite_graph_t ei_learning_block_config_27 = {
     .implementation_version = 1,
-    .block_id = 18,
+    .block_id = 27,
     .object_detection = 0,
     .object_detection_last_layer = EI_CLASSIFIER_LAST_LAYER_UNKNOWN,
     .output_data_tensor = 0,
@@ -77,21 +77,21 @@ const ei_learning_block_config_tflite_graph_t ei_learning_block_config_18 = {
     .output_score_tensor = 2,
     .quantized = 1,
     .compiled = 1,
-    .graph_config = (void*)&ei_config_tflite_graph_18
+    .graph_config = (void*)&ei_config_tflite_graph_27
 };
 
 const size_t ei_learning_blocks_size = 1;
-const uint32_t ei_learning_block_18_inputs[1] = { 20 };
-const uint32_t ei_learning_block_18_inputs_size = 1;
+const uint32_t ei_learning_block_27_inputs[1] = { 31 };
+const uint32_t ei_learning_block_27_inputs_size = 1;
 const ei_learning_block_t ei_learning_blocks[ei_learning_blocks_size] = {
     {
-        18,
+        27,
         false,
         &run_nn_inference,
-        (void*)&ei_learning_block_config_18,
+        (void*)&ei_learning_block_config_27,
         EI_CLASSIFIER_IMAGE_SCALING_NONE,
-        ei_learning_block_18_inputs,
-        ei_learning_block_18_inputs_size,
+        ei_learning_block_27_inputs,
+        ei_learning_block_27_inputs_size,
         4
     },
 };
@@ -105,11 +105,11 @@ const ei_model_performance_calibration_t ei_calibration = {
     0   /* Don't use flags */
 };
 
-const ei_impulse_t impulse_337181_9 = {
+const ei_impulse_t impulse_337181_23 = {
     .project_id = 337181,
     .project_owner = "Leif",
     .project_name = "Project",
-    .deploy_version = 9,
+    .deploy_version = 23,
 
     .nn_input_frame_size = 3960,
     .raw_sample_count = 16000,
@@ -148,6 +148,6 @@ const ei_impulse_t impulse_337181_9 = {
     .categories = ei_classifier_inferencing_categories
 };
 
-const ei_impulse_t& ei_default_impulse = impulse_337181_9;
+const ei_impulse_t& ei_default_impulse = impulse_337181_23;
 
 #endif // _EI_CLASSIFIER_MODEL_METADATA_H_
