@@ -58,7 +58,7 @@ void setup()
 {
     Serial.begin(115200);
     // comment out the below line to cancel the wait for USB connection (needed for native USB)
-    while (!Serial);
+    //while (!Serial);
     Serial.println("Edge Impulse Inferencing Demo");
 
     ei_printf("Inferencing settings:\n");
@@ -79,7 +79,7 @@ void setup()
 }
 
 
-void send_raw(uint8_t data[7], uint8_t resend = 4) {
+void send_raw(uint8_t data[7], uint8_t resend = 10) {
     data[6] = seq_num;
     seq_num++;
     mlr.write(data, 7);
@@ -169,7 +169,7 @@ void loop()
                     result.classification[highest].value,
                     result.classification[0].value, result.classification[1].value, result.classification[2].value, result.classification[3].value);
 
-        if(highestValue > 0.6) {
+        if(highestValue > 0.7) {
           if(highest == 0) { // brighter
             lampOn();
           }else if(highest == 1) { // mood
